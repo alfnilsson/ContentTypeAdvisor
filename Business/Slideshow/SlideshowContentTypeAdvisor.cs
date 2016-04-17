@@ -9,6 +9,7 @@ using Toders.Web.Models.Blocks;
 
 namespace Toders.Web.Business.Slideshow
 {
+	// Register your implementation if you want to add it to the existing implementations of IContentTypeAdvisor
     [ServiceConfiguration(typeof(IContentTypeAdvisor))]
     public class SlideshowContentTypeAdvisor : IContentTypeAdvisor
     {
