@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EPiServer;
 using EPiServer.Cms.Shell.UI.Rest;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
+using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using Toders.Web.Models.Blocks;
 
@@ -15,11 +17,13 @@ namespace Toders.Web.Business.Slideshow
     {
         private readonly IContentLoader _contentLoader;
         private readonly BlockTypeRepository _blockTypeTypeRepository;
+        private readonly ContentTypeAvailabilityService _contentTypeAvailablilityService;
 
-        public SlideshowContentTypeAdvisor(IContentLoader contentLoader, BlockTypeRepository blockTypeTypeRepository)
+        public SlideshowContentTypeAdvisor(IContentLoader contentLoader, BlockTypeRepository blockTypeTypeRepository, ContentTypeAvailabilityService contentTypeAvailablilityService)
         {
             _contentLoader = contentLoader;
             _blockTypeTypeRepository = blockTypeTypeRepository;
+            _contentTypeAvailablilityService = contentTypeAvailablilityService;
         }
 
         public IEnumerable<int> GetSuggestions(IContent parent, bool contentFolder, IEnumerable<string> requestedTypes)
@@ -36,7 +40,18 @@ namespace Toders.Web.Business.Slideshow
                 return Enumerable.Empty<int>();
             }
 
-            return new[] {slideBlockType.ID};
+            int slideBlockTypeId = slideBlockType.ID;
+
+            // Make sure that the SlideBlock is available as child to the parent content, and that the editor has proper access rights to create the Slide Block
+            IEnumerable<int> listAvailable = this._contentTypeAvailablilityService.ListAvailable(parent, contentFolder, PrincipalInfo.Current.Principal)
+                .Select(contentType => contentType.ID)
+                .Distinct();
+            if (listAvailable.Contains(slideBlockTypeId) == false)
+            {
+                return Enumerable.Empty<int>();
+            }
+
+            return new[] {slideBlockTypeId};
         }
     }
 }
