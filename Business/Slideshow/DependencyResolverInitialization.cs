@@ -13,7 +13,7 @@ namespace Toders.Web.Business.Slideshow
         {
             // This is to remove all implementations of IContentTypeAdvisor and disable the "Suggested Content Types" functionality in Episerver
             context.Container.EjectAllInstancesOf<IContentTypeAdvisor>();
-			
+
             // Also add this if you only want to use your custom ContentTypeAdvisor instead of just adding it to the existing ones
             context.Container.Configure(x => x.For<IContentTypeAdvisor>().Use<SlideshowContentTypeAdvisor>());
         }
